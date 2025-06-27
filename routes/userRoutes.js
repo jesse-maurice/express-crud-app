@@ -1,15 +1,41 @@
-const Router = require("router");
-const {createUser, getAllUsers, getAUser, getByQuery, editUser, deleteUser} = require("../controllers/userController");
+import { Router } from "express";
+import {
+  createUser,
+  getAllUsers,
+  getAUser,
+  getByQuery,
+  editUser,
+  editProfile,
+  deleteUser,
+} from "../controllers/userApi/barrel.js";
+
+import authMiddleware from "../middlewares/authMiddleware.js";
+
 const userRouter = Router();
 
+const adminCheck = async (req, res, next) => {
+  const user = req.user;
+  if (user.AltimaAdmin === true) {
+    next();
+  } else {
+    res
+      .status(401)
+      .json({ message: "You are not authorized to access this route" });
+  }
+};
 
 userRouter
+  //post
   .post("/user/create", createUser)
-  .get("/users", getAllUsers)
+  //get
+  .get("/users", authMiddleware, getAllUsers)
   .get("/user/:id", getAUser)
   .get("/usersByquery", getByQuery)
-  .put("/user/update/:id", editUser)
-  .delete("/user/delete/:id", deleteUser);
+  //put
+  .put("/user/update/:id", authMiddleware, editUser)
+  .put("/profile/update/:id", authMiddleware, editProfile)
 
+  //delete
+  .delete("/user/delete/:id", authMiddleware, deleteUser);
 
-module.exports = userRouter;
+export default userRouter;

@@ -1,19 +1,33 @@
-const express = require('express');
-dotenv = require('dotenv').config();
-const connectDB = require('./db/mongodb');
-const userRouter = require('./routes/userRoutes');
+import express from "express";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import connectDB from "./db/mongodb.js";
+import userRouter from "./routes/userRoutes.js";
+import authRouter from "./routes/authRoutes.js";
+import productRouter from "./routes/productRoutes.js";
+import cartRouter from "./routes/cartRoutes.js";
+
+// Load environment variables
+dotenv.config();
+
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 
 // Middlewares
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', userRouter);
+// Routes
+app.use("/api", userRouter);
+app.use("/api", authRouter);
+app.use("/api", productRouter);
+app.use("/api", cartRouter);
 
+const port = process.env.PORT || 3000;
 
-const port = process.env.PORT;
-
-
-app.listen(port, console.log(`Server is running on port ${port}`));
+app.listen(port, () => {
+	console.log(`🚀 Server is running on port ${port}`);
+});
